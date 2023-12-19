@@ -13,6 +13,6 @@ These are the MATLAB files used to cross-check Maude and for other procedures:
 
 absyn.m -- this script describes the same interactions as the Maude module absyn.txt shown above  
 absynINI.m -- this script initializes simulations of amyloid-Beta affects on LTP using absyn.m  
-absynCMB.m -- this script estimates the benefit of drugs in ameliorating amyloid-Beta affects on LTP  
+absynCMB.m -- this script estimates benefit of drug combos in ameliorating amyloid-Beta affects on LTP  
 absynFIND.m -- searches array produced by absynCMB.m for drug combinations producing specific benefits  
 
