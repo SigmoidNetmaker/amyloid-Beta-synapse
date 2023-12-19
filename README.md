@@ -11,5 +11,6 @@ absyn-search.txt -- this command executes a state-space search of the amyloid-Be
 
 These are the MATLAB files used to cross-check Maude and for other procedures:  
 
+absyn.m -- this script describes the same interactions as the Maude module absyn.txt shown above  
 
 
