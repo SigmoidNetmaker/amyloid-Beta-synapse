@@ -1,0 +1,240 @@
+*** this module starts the process of 
+*** modeling Abeta effects on LTP
+
+mod ABSYN is
+  protecting INT .
+  sort State .
+
+  ops preSYN                   : Int -> State [ctor] .
+  ops Glu Abeta                : Int -> State [ctor] .
+  ops ACh BDNF                 : Int -> State [ctor] .
+  ops AR1 AR2 KLC2 AMPAR       : Int -> State [ctor] .
+  ops NR1 NR2 NMDAR            : Int -> State [ctor] .
+  ops TrkB Shc SOS IRS         : Int -> State [ctor] .
+  ops nAChR mGluR5 Gq          : Int -> State [ctor] .
+  ops PIP2 PLC IP3 DAG         : Int -> State [ctor] .
+  ops IP3R1 Ca CaM             : Int -> State [ctor] .
+  ops PKA PKC CaMKII           : Int -> State [ctor] .
+  ops Pyk2 Src GSK3            : Int -> State [ctor] .
+  ops Ras PI3K PDK1 Akt        : Int -> State [ctor] .
+  ops PP1 PP2B STEP            : Int -> State [ctor] .
+  ops PPI1 I2                  : Int -> State [ctor] .
+  ops proteosome               : Int -> State [ctor] .
+  ops AC cAMP PDE              : Int -> State [ctor] .
+  ops AChRnorm TrkBnorm        : Int -> State [ctor] .
+  ops mGRblock                 : Int -> State [ctor] .
+  ops PKCact PKCblock          : Int -> State [ctor] .
+  ops ACact PDEblock           : Int -> State [ctor] .
+  ops PP1block PP2Bblock       : Int -> State [ctor] .
+  ops GSK3block proACT         : Int -> State [ctor] .
+  ops CaSAT                    : -> Int .
+  ops BDNFthr PP2Bthr          : -> Int .
+  ops ACthr PKCthr CaMKthr     : -> Int .         
+  op _ _ : State State -> State [assoc comm ctor] .
+
+  vars D X X1 X2 X3 X4 X5 X6 Y Y1 Y2 : Int .
+
+  eq BDNFthr = 2 .
+  eq PP2Bthr = 5 .
+  eq ACthr = 7 .
+  eq PKCthr = 8 .
+  eq CaMKthr = 9 .
+  eq CaSAT = 20 .
+
+  ceq [GluLEV]    : preSYN(X) Glu(Y) = preSYN(X) Glu(X) if Y =/= X .
+
+  ceq [AChLEV]    : preSYN(X) ACh(Y) = preSYN(X) ACh(X) if Y =/= X .
+
+  ceq [BDNFlev]   : preSYN(X) BDNF(Y) = preSYN(X) 
+                    BDNF(if X > BDNFthr then 1 else 0 fi) 
+                    if Y =/= if X > BDNFthr then 1 else 0 fi . 
+
+  ceq [protLEV]   : Abeta(X1) proACT(X2) proteosome(Y) = Abeta(X1) proACT(X2) 
+                    proteosome(if X1 == 0 and X2 == 0 then 1 else
+                    if X1 == 1 and X2 == 0 then 0 else
+                    if X2 == 1 then 2 else 0 fi fi fi)
+                    if Y =/= if X1 == 0 and X2 == 0 then 1 else
+                    if X1 == 1 and X2 == 0 then 0 else
+                    if X2 == 1 then 2 else 0 fi fi fi .
+
+  ceq [NMDARlev]  : Glu(X1) NR1(X2) NR2(X3) NMDAR(Y) = 
+                    Glu(X1) NR1(X2) NR2(X3) 
+                    NMDAR(if X1 == 0 then 0 else X1 + X2 + X3 fi) 
+                    if Y =/= if X1 == 0 then 0 else X1 + X2 + X3 fi .
+
+  ceq [mGlrR5lev] : Glu(X1) mGRblock(X2) mGluR5(Y) = Glu(X1) mGRblock(X2) 
+                    mGluR5(if X1 == 0 then 0 else 
+                    if X1 > 0 and X2 == 0 then 1 else
+                    if X2 == 1 then 0 else 0 fi fi fi)
+                    if Y =/= if X1 == 0 then 0 else 
+                    if X1 > 0 and X2 == 0 then 1 else
+                    if X2 == 1 then 0 else 0 fi fi fi .
+
+  ceq [GqLEV]     : mGluR5(X) Gq(Y) = mGluR5(X) Gq(X) if Y =/= X .
+
+  ceq [PLClev]    : Gq(X) PLC(Y) = Gq(X) PLC(X) if Y =/= X .
+ 
+  ceq [IP3lev]    : PLC(X1) PIP2(X2) IP3(Y) = PLC(X1) PIP2(X2) 
+                    IP3(if X2 > 0 then X1 else 0 fi) 
+                    if Y =/= if X2 > 0 then X1 else 0 fi .
+
+  ceq [DAGlev]    : PLC(X1) PIP2(X2) DAG(Y) = PLC(X1) PIP2(X2) 
+                    DAG(if X2 > 0 then X1 else 0 fi) 
+                    if Y =/= if X2 > 0 then X1 else 0 fi .
+
+  ceq [IP3Rlev]   : IP3(X) IP3R1(Y) = IP3(X) IP3R1(X) if Y =/= X . 
+
+  ceq [nAChRlev]  : ACh(X1) Abeta(X2) AChRnorm(X3) nAChR(Y) = ACh(X1) Abeta(X2) AChRnorm(X3)
+                    nAChR(if X2 == 0 or X3 == 1 then X1 else
+                    if X1 == 0 and X2 == 1 and X3 == 0 then 1 else
+                    if X1 > 0 and X2 == 1 and X3 == 0 then 2 else 0 fi fi fi)
+                    if Y =/= if X2 == 0 or X3 == 1 then X1 else
+                    if X1 == 0 and X2 == 1 and X3 == 0 then 1 else
+                    if X1 > 0 and X2 == 1 and X3 == 0 then 2 else 0 fi fi fi .
+
+  ceq [CaLEV]     : NMDAR(X1) nAChR(X2) IP3R1(X3) Ca(Y) =
+                    NMDAR(X1) nAChR(X2) IP3R1(X3) 
+                    Ca(if (X1 + X2 + X3) < CaSAT then X1 + X2 + X3 else CaSAT fi) 
+                    if Y =/= if (X1 + X2 + X3) < CaSAT then X1 + X2 + X3 else CaSAT fi .
+
+  ceq [CaMlev]    : Ca(X) CaM(Y) = Ca(X) CaM(X) if Y =/= X .
+  
+  ceq [PP2Blev]   : CaM(X1) PP2Bblock(X2) PP2B(Y) = CaM(X1) PP2Bblock(X2) 
+                    PP2B(if X1 > PP2Bthr and X2 == 0 then 1 else
+                    if X1 <= PP2Bthr then 0 else
+                    if X2 == 1 then 0 else 0 fi fi fi)
+                    if Y =/= if X1 > PP2Bthr and X2 == 0 then 1 else
+                    if X1 <= PP2Bthr then 0 else
+                    if X2 == 1 then 0 else 0 fi fi fi . 
+
+  ceq [AClev]     : CaM(X1) ACact(X2) AC(Y) = CaM(X1) ACact(X2) 
+                    AC(if X1 <= ACthr and X2 == 0 then 0 else
+                    if X1 > ACthr or X2 == 1 then 1 else 0 fi fi)
+                    if Y =/=  if X1 <= ACthr and X2 == 0 then 0 else
+                    if X1 > ACthr or X2 == 1 then 1 else 0 fi fi .
+
+  ceq [PDElev]    : PDEblock(X) PDE(Y) = PDEblock(X) 
+                    PDE(if X == 1 then 0 else 1 fi) if Y =/= if X == 1 then 0 else 1 fi .
+ 
+  ceq [cAMPlev]   : AC(X1) PDE(X2) cAMP(Y) = AC(X1) PDE(X2) 
+                    cAMP(if X1 == 0 then 0 else (2 - X2) + X1 fi)
+                    if Y =/= if X1 == 0 then 0 else (2 - X2) + X1 fi .
+
+  ceq [PKAlev]    : cAMP(X) PKA(Y) = cAMP(X) PKA(X) if Y =/= X . 
+
+  ceq [PKClev]    : Ca(X1) PKCact(X2) PKCblock(X3) PKC(Y) =
+                    Ca(X1) PKCact(X2) PKCblock(X3) 
+                    PKC(if X1 <= PKCthr and X2 == 0 then 0 else
+                    if X1 > PKCthr and X3 == 0 then 1 else
+                    if X3 == 1 then 0 else
+                    if X2 == 1 and X3 == 0 then 1 else 0 fi fi fi fi)
+                    if Y =/= if X1 <= PKCthr and X2 == 0 then 0 else
+                    if X1 > PKCthr and X3 == 0 then 1 else
+                    if X3 == 1 then 0 else
+                    if X2 == 1 and X3 == 0 then 1 else 0 fi fi fi fi . 
+
+  ceq [Pyk2lev]   : PKC(X1) STEP(X2) Pyk2(Y) = PKC(X1) STEP(X2) 
+                    Pyk2(max(X1 - X2, 0)) if Y =/= max(X1 - X2, 0) .
+
+  ceq [SrcLEV]    : Pyk2(X) Src(Y) = Pyk2(X) Src(X) if Y =/= X .
+
+  ceq [PPI1lev]   : PKA(X1) PP2B(X2) PPI1(Y) = PKA(X1) PP2B(X2) 
+                    PPI1(if X1 == 0 and X2 == 0 then 1 else
+                    if X1 == 0 and X2 == 1 then 0 else
+                    if X1 > 0 then 1 else 0 fi fi fi)
+                    if Y =/= if X1 == 0 and X2 == 0 then 1 else
+                    if X1 == 0 and X2 == 1 then 0 else
+                    if X1 > 0 then 1 else 0 fi fi fi .
+
+  ceq [TrkBlev]   : BDNF(X) TrkB(Y) = BDNF(X) TrkB(X) if Y =/= X .
+
+  ceq [ShcLEV]    : TrkB(X1) Abeta(X2) TrkBnorm(X3) Shc(Y) = TrkB(X1) Abeta(X2) TrkBnorm(X3) 
+                    Shc(if X2 == 0 or X3 == 1 then X1 else
+                    if X2 == 1 and X3 == 0 then 0 else 0 fi fi)
+                    if Y =/= if X2 == 0 or X3 == 1 then X1 else
+                    if X2 == 1 and X3 == 0 then 0 else 0 fi fi .
+
+  ceq [SOSlev]    : Shc(X) SOS(Y) = Shc(X) SOS(X) if Y =/= X .
+
+  ceq [IRSlev]    : TrkB(X1) Abeta(X2) TrkBnorm(X3) IRS(Y) = TrkB(X1) Abeta(X2) TrkBnorm(X3) 
+                    IRS(if X2 == 0 or X3 == 1 then X1 else
+                    if X2 == 1 and X3 == 0 then 0 else 0 fi fi)
+                    if Y =/= if X2 == 0 or X3 == 1 then X1 else
+                    if X2 == 1 and X3 == 0 then 0 else 0 fi fi .
+
+  ceq [RasLEV]    : SOS(X) Ras(Y) = SOS(X) Ras(X) if Y =/= X .
+
+  ceq [PI3Klev]   : IRS(X1) Ras(X2) PI3K(Y) = IRS(X1) Ras(X2) 
+                    PI3K(if X1 == 1 or X2 == 1 then 1 else 0 fi)
+                    if Y =/= if X1 == 1 or X2 == 1 then 1 else 0 fi .
+
+  ceq [PDK1lev]   : PI3K(X) PDK1(Y) = PI3K(X) PDK1(X) if Y =/= X .
+
+  ceq [AktLEV]    : PDK1(X) Akt(Y) = PDK1(X) Akt(X) if Y =/= X .  
+
+  ceq [CaMKIIlev] : CaM(X1) PP1(X2) CaMKII(Y) = 
+                    CaM(X1) PP1(X2) 
+                    CaMKII(if X1 <= CaMKthr and X2 > 0 then 0 else
+                    if X1 > CaMKthr then 1 else 0 fi fi) 
+                    if Y =/= if X1 <= CaMKthr and X2 > 0 then 0 else
+                    if X1 > CaMKthr then 1 else 0 fi fi .
+
+  ceq [PP1lev]    : CaMKII(X1) I2(X2) PPI1(X3) PP1block(X4) PP1(Y) =
+                    CaMKII(X1) I2(X2) PPI1(X3) PP1block(X4) 
+                    PP1(if X1 == 0 and X2 == 0 and X3 == 0 and X4 == 0 then 1 else 0 fi)
+                  if Y =/= if X1 == 0 and X2 == 0 and X3 == 0 and X4 == 0 then 1 else 0 fi .
+
+  ceq [GSK3lev]   : GSK3block(X1) PP1(X2) Akt(X3) PKA(X4) PKC(X5) CaMKII(X6) GSK3(Y) = 
+                    GSK3block(X1) PP1(X2) Akt(X3) PKA(X4) PKC(X5) CaMKII(X6) 
+                    GSK3(if X1 == 1 then 0 else
+                    if X2 == 0 and X3 == 0 then 1 else
+                    if X2 == 1 and X3 == 0 then 2 else
+                    if X3 == 1 and X4 == 2 and X5 == 1 and X6 == 1 then 0 else
+                    if X3 == 1 then max((1 + X2) - (X3 + min(X4, 1)), 0) else 
+                    1 fi fi fi fi fi)
+                    if Y =/= if X1 == 1 then 0 else
+                    if X2 == 0 and X3 == 0 then 1 else
+                    if X2 == 1 and X3 == 0 then 2 else
+                    if X3 == 1 and X4 == 2 and X5 == 1 and X6 == 1 then 0 else
+                    if X3 == 1 then max((1 + X2) - (X3 + min(X4, 1)), 0) else 
+                    1 fi fi fi fi fi .
+ 
+  ceq [I2lev]     : GSK3(X1) GSK3block(X2) Akt(X3) PKA(X4) PP1(X5) I2(Y) = 
+                    GSK3(X1) GSK3block(X2) Akt(X3) PKA(X4) PP1(X5)  
+                    I2(if X1 == 0 and X2 == 1 then 1 else 
+                    if X1 == 0 and X3 == 1 and X4 > 0 and X5 == 1 then 1 else 0 fi fi) 
+                    if Y =/= if X1 == 0 and X2 == 1 then 1 else 
+                    if X1 == 0 and X3 == 1 and X4 > 0 and X5 == 1 then 1 else 0 fi fi . 
+
+  ceq [AR1lev]    : CaMKII(X1) PKC(X2) PKA(X3) PP1(X4) PP2B(X5) AR1(Y) =
+                    CaMKII(X1) PKC(X2) PKA(X3) PP1(X4) PP2B(X5) 
+                    AR1(max(1 + ((X1 + X2 + max(X3 - 1, 0)) - (X4 + X5)), 0)) 
+                    if Y =/= max(1 + ((X1 + X2 + max(X3 - 1, 0)) - (X4 + X5)), 0) . 
+
+  ceq [AR2lev]    : STEP(X) AR2(Y) = STEP(X) 
+                    AR2(max(1 - X, 0)) if Y =/= max(1 - X, 0) .
+
+  ceq [KLC2lev]   : GSK3(X) KLC2(Y) = GSK3(X) 
+                    KLC2(max(2 - X, 0)) if Y =/= max(2 - X, 0) . 
+
+  ceq [AMPARlev]  : AR1(X1) AR2(X2) KLC2(X3) AMPAR(Y) = AR1(X1) AR2(X2) KLC2(X3) 
+                    AMPAR(max(X1 + X2 + X3, 0)) if Y =/= max(X1 + X2 + X3, 0) . 
+                   
+  crl [STEPlev]   : PP2B(X1) PKA(X2) proteosome(X3) STEP(Y) => 
+                    PP2B(X1) PKA(X2) proteosome(X3) 
+                    STEP(if X3 == 2 then 0 else
+                    if X3 == 1 then max(X1 - X2, 0) else
+                    if X3 == 0 and X1 > 0 then max((X1 + 1) - X2, 0) else 0 fi fi fi)
+                    if Y =/= if X3 == 2 then 0 else
+                    if X3 == 1 then max(X1 - X2, 0) else
+                    if X3 == 0 and X1 > 0 then max((X1 + 1) - X2, 0) else 0 fi fi fi .
+
+  crl [NR2lev]    : Src(X) NR2(Y) => Src(X) 
+                    NR2(if X == 0 then 1 else 2 fi) 
+                    if Y =/= if X == 0 then 1 else 2 fi .
+                  
+endm
+
+
+
+

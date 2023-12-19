@@ -1,0 +1,38 @@
+*** this module set up checking of the ABSYN model
+
+in absyn.txt .
+in model-checker.maude .
+
+mod MC-ABSYN is
+  including ABSYN .
+  including MODEL-CHECKER .
+
+  var X : Nat .
+  var S : State .
+
+  op AM : State -> State [ctor] .
+  ops AMPARlt3 AMPARgt3 AMPAReq0 AMPAReq6             : -> Prop .
+  ops CaMKIIeq1 SrcEQ1 PKAeq1 PKAeq2 PKCeq1           : -> Prop .
+  ops PP2Beq1 PP1eq1 STEPeq1 STEPeq2                  : -> Prop .
+  ops AktEQ1 GSK3eq1 GSK3eq2                          : -> Prop .
+
+  eq AM(S AMPAR(X)) |= AMPARlt3 = X < 3 .
+  eq AM(S AMPAR(X)) |= AMPARgt3 = X > 3 .
+  eq AM(S AMPAR(X)) |= AMPAReq0 = X == 0 .
+  eq AM(S AMPAR(X)) |= AMPAReq6 = X == 6 .
+  eq AM(S CaMKII(X)) |= CaMKIIeq1 = X == 1 .
+  eq AM(S Src(X)) |= SrcEQ1 = X == 1 .
+  eq AM(S PKA(X)) |= PKAeq1 = X == 1 .
+  eq AM(S PKA(X)) |= PKAeq2 = X == 2 .
+  eq AM(S PKC(X)) |= PKCeq1 = X == 1 .
+  eq AM(S PP2B(X)) |= PP2Beq1 = X == 1 .
+  eq AM(S PP1(X)) |= PP1eq1 = X == 1 .
+  eq AM(S STEP(X)) |= STEPeq1 = X == 1 .
+  eq AM(S STEP(X)) |= STEPeq2 = X == 2 .
+  eq AM(S Akt(X)) |= AktEQ1 = X == 1 .
+  eq AM(S GSK3(X)) |= GSK3eq1 = X == 1 .
+  eq AM(S GSK3(X)) |= GSK3eq2 = X == 2 .
+
+endm
+
+

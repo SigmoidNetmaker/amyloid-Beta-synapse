@@ -1,0 +1,93 @@
+*** this command model-checks in ABSYN
+
+red in MC-ABSYN : 
+modelCheck( AM(
+*** set input levels
+preSYN(3) Abeta(0) 
+*** set initial transmitter levels
+ACh(0) BDNF(0) Glu(0) 
+*** set receptor manipulating compounds
+AChRnorm(0) TrkBnorm(0) mGRblock(0)
+*** set kinase and associated compounds
+ACact(0) PKCact(0) PKCblock(0) PDEblock(0) GSK3block(0)
+*** set phosphatase and associated compounds
+PP1block(0) PP2Bblock(0) proACT(0)
+*** set initial receptor and subunit levels
+AR1(0) AR2(0) KLC2(0) AMPAR(0) NR1(1) NR2(1) NMDAR(0) nAChR(0) mGluR5(0) 
+TrkB(0) Shc(0) SOS(0) IRS(0)         
+*** set initial kinase levels
+PKA(0) PKC(0) CaMKII(0) Pyk2(0) Src(0) GSK3(0) Ras(0) PI3K(0) 
+PDK1(0) Akt(0) PPI1(0) I2(0) 
+*** set initial phosphatase levels
+PP1(0) PP2B(0) STEP(0)
+*** set initial signal molecule and associated levels
+Gq(0) PIP2(1) PLC(0) IP3(0) DAG(0) IP3R1(0) proteosome(0) 
+AC(0) cAMP(0) PDE(1) Ca(0) CaM(0) ),
+
+*** [] ~ PP2Beq1 /\ [] ~ PP1eq1 /\ [] ~ STEPeq1 /\ [] ~ STEPeq2 /\ 
+*** [] ~ GSK3eq2 /\ []  GSK3eq1 /\ [] ~ PKAeq1 /\ [] ~ PKAeq2 /\ 
+*** [] ~ PKCeq1 /\ [] ~ CaMKIIeq1 /\ [] ~ AktEQ1
+*** this is true with preSYN(0) Abeta(0), or with preSYN(1) Abeta(0), 
+*** or with preSYN(0) Abeta(1), but false with preSYN(1) Abeta(1) 
+
+*** ~ AMPAReq0 U PP2Beq1 /\ PP1eq1 /\ STEPeq1 /\ GSK3eq2
+*** this is true with preSYN(2) Abeta(0) but 
+*** false with preSYN(1) Abeta(1), or with preSYN(2) Abeta(1) 
+*** note that STEP is one and AR2 is driven to zero
+
+*** ~ AMPAReq0 U PP2Beq1 /\ PP1eq1 /\ STEPeq2 /\ GSK3eq2
+*** this is false with preSYN(2) Abeta(0) but 
+*** true with preSYN(1) Abeta(1), or with preSYN(2) Abeta(1) 
+*** note that STEP is two, but this makes no difference because 
+*** AR2 is already driven to zero
+
+*** [] ~ PKAeq1 /\ [] ~ PKAeq2 /\ [] ~ PKCeq1 /\ [] ~ CaMKIIeq1 /\ [] ~ AktEQ1
+*** this is true with preSYN(2) Abeta(0), or with preSYN(1) Abeta(1), 
+*** or with  preSYN(2) Abeta(1)
+
+*** [] PP2Beq1 /\ [] PP1eq1 /\ [] STEPeq2 /\ [] GSK3eq2
+*** this is false with preSYN(1) Abeta(1), or with preSYN(2) Abeta(1)  
+
+*** <> PP2Beq1 /\ <> PP1eq1 /\ <> STEPeq2 /\ <> GSK3eq2
+*** this is true with preSYN(1) Abeta(1), or with preSYN(2) Abeta(1)
+*** it is false with preSYN(1) Abeta(1) mGRblock(1) but 
+*** it is true with preSYN(2) Abeta(1) mGRblock(1), or with preSYN(3) Abeta(1) mGRblock(1)  
+*** it is false with preSYN(1) Abeta(1) AChRnorm(1) mGRblock(1), but
+*** it is true with preSYN(2) Abeta(1) AChRnorm(1) mGRblock(1) 
+
+*** ~ AMPAReq6 U PKAeq2 /\ PKCeq1 /\ CaMKIIeq1 /\ AktEQ1
+*** this is true with preSYN(3) Abeta(0) but false with preSYN(3) Abeta(1) 
+
+*** [] PKAeq2 /\ PKCeq1 /\ CaMKIIeq1 /\ AktEQ1
+*** this is false with preSYN(3) Abeta(0) 
+
+*** [] PKAeq2 /\ PKCeq1 /\ AktEQ1
+*** this is true with preSYN(3) Abeta(0) 
+
+*** [] CaMKIIeq1
+*** this is false with preSYN(3) Abeta(0)
+
+*** <> CaMKIIeq1
+*** this is true with preSYN(3) Abeta(0), meaning that the Src loop 
+*** needs to be closed in order to acheive full LTP
+
+*** ~ CaMKIIeq1 U SrcEQ1
+*** this is true with preSYN(3) Abeta(0) 
+
+*** <> PKAeq2 /\ <> PKCeq1 /\ <> CaMKIIeq1 /\ <> AktEQ1
+*** this is true with preSYN(3) Abeta(0) but false with preSYN(3) Abeta(1) 
+*** it is false with preSYN(3) Abeta(1) AChRnorm(1) but 
+*** it is true with preSYN(3) Abeta(1) AChRnorm(1) TrkBnorm(1)
+*** it is false with preSYN(3) Abeta(1) mGRblock(1)
+*** it is also false with preSYN(3) Abeta(1) AChRnorm(1) mGRblock(1)
+
+*** [] PKAeq2 /\ [] PKCeq1 /\ <> CaMKIIeq1 
+*** this is true with preSYN(3) Abeta(1) AChRnorm(1) 
+
+*** [] PKAeq2 
+*** this is with preSYN(3) Abeta(1) 
+
+*** <> PKCeq1 \/ <> CaMKIIeq1 \/ <> AktEQ1
+*** this is false with preSYN(3) Abeta(1) 
+
+) .  
